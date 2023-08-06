@@ -33,10 +33,10 @@ jobs:
         run: mvn clean install -DskipTests
 
       - name: Run specific test
-        run: mvn test -Dtest=org.broadleafcommerce.common.sitemap.service.CustomUrlSiteMapGeneratorTest#testCustomUrlSiteMapGenerator
+        run: mvn -pl common test -Dtest='org.broadleafcommerce.common.sitemap.service.CustomUrlSiteMapGeneratorTest#testCustomUrlSiteMapGenerator'
 
       - name: Run specific test using NON-DEX
-        run: mvn -pl common edu.illinois:nondex-maven-plugin:2.1.1:nondex -Dtest=org.broadleafcommerce.common.sitemap.service.CustomUrlSiteMapGeneratorTest#testCustomUrlSiteMapGenerator
+        run: mvn -pl common edu.illinois:nondex-maven-plugin:2.1.1:nondex -Dtest='org.broadleafcommerce.common.sitemap.service.CustomUrlSiteMapGeneratorTest#testCustomUrlSiteMapGenerator'
 
     # Optional: Uploads the full dependency graph to GitHub to improve the quality of Dependabot alerts this repository can receive
       - name: Update dependency graph
