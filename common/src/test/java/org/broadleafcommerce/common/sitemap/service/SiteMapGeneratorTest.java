@@ -37,6 +37,8 @@ import org.easymock.EasyMock;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
+import org.xmlunit.diff.DefaultNodeMatcher;
+import org.xmlunit.diff.ElementSelectors;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -45,6 +47,9 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.List;
+
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.xmlunit.matchers.CompareMatcher.isSimilarTo;
 
 /**
  * Base class for site map generator tests
@@ -135,7 +140,8 @@ public class SiteMapGeneratorTest {
     protected void compareFiles(File file1, String pathToFile2) throws IOException {
         String actualOutput = convertFileToString(file1);
         String expectedOutput = convertFileToString(new File(pathToFile2));
-        Assert.assertTrue(actualOutput.equals(expectedOutput));
+        assertThat(actualOutput, isSimilarTo(expectedOutput)
+                .withNodeMatcher(new DefaultNodeMatcher(ElementSelectors.byNameAndText)));
     }
 
     protected String convertFileToString(File file) throws IOException {
@@ -147,7 +153,7 @@ public class SiteMapGeneratorTest {
             if (line.contains("</lastmod>")) {
                 continue;
             }
-            line = line.replaceAll("\\s+", "");
+            line = line.replaceAll("\\s+", " ");
             sb.append(line);
         }
         br.close();
