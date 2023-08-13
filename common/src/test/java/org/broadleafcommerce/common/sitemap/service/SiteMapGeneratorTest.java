@@ -37,14 +37,14 @@ import org.easymock.EasyMock;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
+import org.w3c.dom.Document;
 import org.xmlunit.diff.DefaultNodeMatcher;
 import org.xmlunit.diff.ElementSelectors;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStreamReader;
+import javax.xml.XMLConstants;
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -138,10 +138,26 @@ public class SiteMapGeneratorTest {
     }
 
     protected void compareFiles(File file1, String pathToFile2) throws IOException {
-        String actualOutput = convertFileToString(file1);
-        String expectedOutput = convertFileToString(new File(pathToFile2));
-        assertThat(actualOutput, isSimilarTo(expectedOutput)
-                .withNodeMatcher(new DefaultNodeMatcher(ElementSelectors.byNameAndText)));
+        try {
+            DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
+            dbf.setFeature("http://apache.org/xml/features/disallow-doctype-decl", true);
+            dbf.setFeature(XMLConstants.FEATURE_SECURE_PROCESSING, true);
+            dbf.setNamespaceAware(true);
+            dbf.setCoalescing(true);
+            dbf.setIgnoringElementContentWhitespace(true);
+            dbf.setIgnoringComments(true);
+            DocumentBuilder db = dbf.newDocumentBuilder();
+
+            String actualOutput = convertFileToString(file1);
+            String expectedOutput = convertFileToString(new File(pathToFile2));
+            Document doc1 = db.parse(new ByteArrayInputStream(actualOutput.getBytes()));
+            Document doc2 = db.parse(new ByteArrayInputStream(expectedOutput.getBytes()));
+            doc1.normalizeDocument();
+            doc2.normalizeDocument();
+            Assert.assertTrue(doc1.isEqualNode(doc2));
+        } catch (Exception e) {
+            throw new IOException();
+        }
     }
 
     protected String convertFileToString(File file) throws IOException {
